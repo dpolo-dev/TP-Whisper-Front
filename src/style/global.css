@@ -81,3 +81,39 @@ input {
   text-align: center;
   border-radius: 0;
 }
+
+.video-rooms-list {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+}
+
+.video-room-button {
+  width: 100%;
+  max-width: 500px;
+  padding: 10px 20px;
+  font-size: 18px;
+  text-align: center;
+  background-color: #a259ff;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.video-room-button:hover {
+  background-color: #7a3fb9;
+}
+
+.video-room-button:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+}
+
+.refresh-button {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}
