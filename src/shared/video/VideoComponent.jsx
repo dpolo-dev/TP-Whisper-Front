@@ -1,12 +1,8 @@
-import PropTypes from "prop-types";
-import { useState, useEffect, useRef } from "react";
-import {
-  attachLocalVideo,
-  connectToRoom,
-  getTwilioToken,
-} from "../../services/twilioService";
+import PropTypes from 'prop-types';
+import { useState, useEffect, useRef } from 'react';
+import { attachLocalVideo, connectToRoom, getTwilioToken } from '../../services/twilioService';
 
-const VideoComponent = ({ roomName, user }) => {
+const VideoComponent = ({ roomName = 'new-room', user }) => {
   const [room, setRoom] = useState(null);
   const videoRef = useRef(null);
 
@@ -14,21 +10,20 @@ const VideoComponent = ({ roomName, user }) => {
     const startVideoCall = async () => {
       try {
         const token = await getTwilioToken(user.username);
-
-        const room = await connectToRoom(token, roomName || `room|${user.username}|${user.id}`);
+        const room = await connectToRoom(token, roomName);
         setRoom(room);
 
         await attachLocalVideo(videoRef);
 
-        room.on("participantConnected", (participant) => {
+        room.on('participantConnected', (participant) => {
           console.log(`Participant ${participant.identity} connected`);
         });
 
-        room.on("participantDisconnected", (participant) => {
+        room.on('participantDisconnected', (participant) => {
           console.log(`Participant ${participant.identity} disconnected`);
         });
       } catch (error) {
-        console.error("Error starting video call:", error);
+        console.error('Error starting video call:', error);
       }
     };
 
@@ -39,7 +34,7 @@ const VideoComponent = ({ roomName, user }) => {
         room.disconnect();
       }
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [roomName, user]);
 
   return (
@@ -53,10 +48,7 @@ const VideoComponent = ({ roomName, user }) => {
 export default VideoComponent;
 
 VideoComponent.propTypes = {
-  roomName: PropTypes.string, 
-  user: PropTypes.shape({
-    id: PropTypes.string.isRequired,
-    username: PropTypes.string.isRequired,
-    userType: PropTypes.string.isRequired,
-  }).isRequired,
-};
+    roomName: PropTypes.any,
+    user: PropTypes.any,
+  };
+  

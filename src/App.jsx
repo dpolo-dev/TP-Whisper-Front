@@ -14,6 +14,7 @@ import { store } from "./store/store";
 import PrivateRoute from "./guards/PrivateRoute";
 import { styled } from "@mui/material/styles";
 import Stack from "@mui/material/Stack";
+import { brand, gray } from "./shared/themePrimitives";
 
 const AppContainer = styled(Stack)(({ theme }) => ({
   minHeight: "100vh",
@@ -35,7 +36,7 @@ const AppContainer = styled(Stack)(({ theme }) => ({
     backgroundRepeat: "no-repeat",
     ...theme.applyStyles("dark", {
       backgroundImage:
-        "radial-gradient(at 50% 50%, hsla(210, 100%, 16%, 0.5), hsl(220, 30%, 5%))",
+        `radial-gradient(at 50% 50%, ${brand[800]}, ${gray[800]})`,
     }),
   },
 }));
