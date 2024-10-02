@@ -7,7 +7,11 @@ import MuiCard from "@mui/material/Card";
 import { styled } from "@mui/material/styles";
 import Chip from "@mui/material/Chip";
 import { TextField } from "@mui/material";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { v4 as uuidv4 } from "uuid";
+import { useDispatch, useSelector } from "react-redux";
+import { login } from "../../store/userSlice";
 
 const Card = styled(MuiCard)(({ theme }) => ({
   display: "flex",
@@ -54,11 +58,25 @@ const SignInContainer = styled(Stack)(({ theme }) => ({
 }));
 
 export default function Login() {
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const user = useSelector((state) => state.user.user);
+
   const [usernameError, setUsernameError] = useState(false);
   const [usernameErrorMessage, setUsernameErrorMessage] = useState("");
   const [userTypeError, setUserTypeError] = useState(false);
   const [userTypeErrorMessage, setUserTypeErrorMessage] = useState("");
   const [selectedUserType, setSelectedUserType] = useState("");
+
+  useEffect(() => {
+    if (user) {
+      if (user.userType === "client") {
+        navigate("/client");
+      } else if (user.userType === "customer") {
+        navigate("/customer");
+      }
+    }
+  }, [user, navigate]);
 
   const handleSubmit = (event) => {
     event.preventDefault();
@@ -66,11 +84,20 @@ export default function Login() {
       return;
     }
     const data = new FormData(event.currentTarget);
-    const username = data.get("username");
-    console.log({
-      username,
+
+    const userData = {
+      id: uuidv4(),
+      username: data.get("username"),
       userType: selectedUserType,
-    });
+    };
+
+    dispatch(login(userData));
+
+    if (selectedUserType === "client") {
+      navigate("/client");
+    } else if (selectedUserType === "customer") {
+      navigate("/customer");
+    }
   };
 
   const validateInputs = () => {

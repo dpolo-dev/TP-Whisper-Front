@@ -9,19 +9,38 @@ import Login from "./login";
 import Customer from "./customer";
 import Client from "./client";
 import AppTheme from "./shared/AppTheme";
+import { Provider } from "react-redux";
+import { store } from "./store/store";
+import PrivateRoute from "./guards/PrivateRoute";
 
 export default function App() {
   return (
     <AppTheme>
-      <CssBaseline />
-      <Router>
-        <Routes>
-          <Route path="/login" element={<Login />} />
-          <Route path="/client" element={<Client />} />
-          <Route path="/customer" element={<Customer />} />
-          <Route path="*" element={<Navigate to="/login" replace />} />
-        </Routes>
-      </Router>
+      <Provider store={store}>
+        <CssBaseline />
+        <Router>
+          <Routes>
+            <Route path="/login" element={<Login />} />
+            <Route
+              path="/client"
+              element={
+                <PrivateRoute allowedUserType="client">
+                  <Client />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/customer"
+              element={
+                <PrivateRoute allowedUserType="customer">
+                  <Customer />
+                </PrivateRoute>
+              }
+            />
+            <Route path="*" element={<Navigate to="/login" replace />} />
+          </Routes>
+        </Router>
+      </Provider>
     </AppTheme>
   );
 }
