@@ -117,3 +117,30 @@ input {
   justify-content: center;
   margin-top: 20px;
 }
+
+.language-selector {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  position: fixed;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+  background-color: #1d1b31;
+  padding: 10px;
+  border-radius: 8px;
+}
+
+.flag {
+  width: 50px;
+  height: 50px;
+  cursor: pointer;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  border-radius: 50%;
+}
+
+.flag.selected {
+  transform: scale(1.2);
+  box-shadow: 0 0 15px 5px rgba(92, 39, 251, 0.6);
+}

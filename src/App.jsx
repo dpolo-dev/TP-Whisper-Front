@@ -15,7 +15,9 @@ import PrivateRoute from "./guards/PrivateRoute";
 import { styled } from "@mui/material/styles";
 import Stack from "@mui/material/Stack";
 import { brand, gray } from "./shared/themePrimitives";
-import './style/global.css';
+import "./style/global.css";
+import { LanguageProvider } from "./context/LanguageContext";
+import LanguageSelector from "./shared/customizations/LanguageSelector";
 
 const AppContainer = styled(Stack)(({ theme }) => ({
   minHeight: "100vh",
@@ -36,8 +38,7 @@ const AppContainer = styled(Stack)(({ theme }) => ({
       "radial-gradient(ellipse at 50% 50%, hsl(210, 100%, 97%), hsl(0, 0%, 100%))",
     backgroundRepeat: "no-repeat",
     ...theme.applyStyles("dark", {
-      backgroundImage:
-        `radial-gradient(at 50% 50%, ${brand[800]}, ${gray[800]})`,
+      backgroundImage: `radial-gradient(at 50% 50%, ${brand[800]}, ${gray[800]})`,
     }),
   },
 }));
@@ -47,29 +48,33 @@ export default function App() {
     <AppTheme>
       <AppContainer>
         <Provider store={store}>
-          <CssBaseline />
-          <Router>
-            <Routes>
-              <Route path="/login" element={<Login />} />
-              <Route
-                path="/client"
-                element={
-                  <PrivateRoute allowedUserType="client">
-                    <Client />
-                  </PrivateRoute>
-                }
-              />
-              <Route
-                path="/customer"
-                element={
-                  <PrivateRoute allowedUserType="customer">
-                    <Customer />
-                  </PrivateRoute>
-                }
-              />
-              <Route path="*" element={<Navigate to="/login" replace />} />
-            </Routes>
-          </Router>
+          <LanguageProvider>
+            <CssBaseline />
+            <LanguageSelector />
+
+            <Router>
+              <Routes>
+                <Route path="/login" element={<Login />} />
+                <Route
+                  path="/client"
+                  element={
+                    <PrivateRoute allowedUserType="client">
+                      <Client />
+                    </PrivateRoute>
+                  }
+                />
+                <Route
+                  path="/customer"
+                  element={
+                    <PrivateRoute allowedUserType="customer">
+                      <Customer />
+                    </PrivateRoute>
+                  }
+                />
+                <Route path="*" element={<Navigate to="/login" replace />} />
+              </Routes>
+            </Router>
+          </LanguageProvider>
         </Provider>
       </AppContainer>
     </AppTheme>
