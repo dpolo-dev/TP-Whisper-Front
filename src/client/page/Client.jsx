@@ -23,10 +23,6 @@ const Client = () => {
     [user.username, user.id]
   );
 
-  useEffect(() => {
-    console.log(roomList);
-  }, [roomList]);
-
   const fetchRooms = useCallback(async () => {
     try {
       const rooms = await videoService.listRooms();
@@ -92,15 +88,16 @@ const Client = () => {
 
     const existingRoom = roomList.find((r) => r.name === newRoomName);
     if (existingRoom) {
-      await joinRoom(existingRoom.sid);
+      await joinRoom(existingRoom._id);
     } else if (roomList.length === 0) {
       await createRoom();
+      await fetchRooms();
       const updatedRoom = roomList.find((r) => r.name === newRoomName);
       if (updatedRoom) {
-        await joinRoom(updatedRoom.sid);
+        await joinRoom(updatedRoom._id);
       }
     }
-  }, [newRoomName, roomList, roomJoined, createRoom, joinRoom]);
+  }, [newRoomName, roomList, roomJoined, createRoom, joinRoom, fetchRooms]);
 
   useEffect(() => {
     fetchRooms();

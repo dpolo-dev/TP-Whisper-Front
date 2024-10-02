@@ -2,6 +2,14 @@
 import { useEffect, useState } from "react";
 import Participant from "./Participant";
 
+const generateRoomName = (roomName) => {
+  const formattedRoomName = roomName
+    .split("_")[1]
+    .replace(/[^a-zA-Z0-9 ]/g, "")
+    .replace(/\s+/g, " ");
+  return `Room for ${formattedRoomName}`;
+};
+
 const Room = ({ room, leaveRoom }) => {
   const [remoteParticipants, setRemoteParticipants] = useState(
     Array.from(room.participants.values())
@@ -18,7 +26,7 @@ const Room = ({ room, leaveRoom }) => {
 
   return (
     <div className="app room">
-      <h2>{room.name}</h2>
+      <h2>{generateRoomName(room.name)}</h2>
       <div className="participants">
         <Participant
           key={room.localParticipant.identity}
