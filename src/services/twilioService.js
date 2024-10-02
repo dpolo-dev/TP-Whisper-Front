@@ -28,6 +28,8 @@ export const connectToRoom = async (token, roomName = "new-room") => {
 };
 
 export const attachLocalVideo = async (videoRef) => {
-  const localTrack = await createLocalVideoTrack();
-  videoRef.current.appendChild(localTrack.attach());
+  if (videoRef.current.children.length < 1) {
+    const localTrack = await createLocalVideoTrack();
+    videoRef.current.appendChild(localTrack.attach());
+  }
 };
