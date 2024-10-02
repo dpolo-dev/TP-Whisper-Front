@@ -1,27 +1,21 @@
 import io from "socket.io-client";
+import { apiUrl } from "../../general-config";
 
-let socket;
+const socket = io(apiUrl, {
+  transports: ["websocket"],
+});
 
-export const initializeSocket = (url) => {
-  socket = io(url, { transports: ["websocket"] });
-
-  socket.on("connect", () => {
-    console.log("Connected to Socket.IO");
-  });
-
-  return socket;
+export const listenForRoomCreation = (
+  onMainRoomCreated,
+  onBreakoutRoomCreated
+) => {
+  socket.on("Main room created", onMainRoomCreated);
+  socket.on("Breakout room created", onBreakoutRoomCreated);
 };
 
-export const subscribeToRoomEvents = (callback) => {
-  if (!socket) return;
-
-  socket.on("Main room created", callback);
-  socket.on("Breakout room created", callback);
-};
-
-export const unsubscribeFromRoomEvents = () => {
-  if (!socket) return;
-
+export const removeListeners = () => {
   socket.off("Main room created");
   socket.off("Breakout room created");
 };
+
+export default socket;

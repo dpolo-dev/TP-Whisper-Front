@@ -15,6 +15,7 @@ import PrivateRoute from "./guards/PrivateRoute";
 import { styled } from "@mui/material/styles";
 import Stack from "@mui/material/Stack";
 import { brand, gray } from "./shared/themePrimitives";
+import './style/global.css';
 
 const AppContainer = styled(Stack)(({ theme }) => ({
   minHeight: "100vh",

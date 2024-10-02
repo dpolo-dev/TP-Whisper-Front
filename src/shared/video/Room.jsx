@@ -14,10 +14,6 @@ const Room = ({ room, breakoutRoomList, joinRoom, leaveRoom }) => {
     room.on("participantDisconnected", (participant) => {
       setRemoteParticipants((prev) => prev.filter((p) => p !== participant));
     });
-
-    return () => {
-      room.disconnect();
-    };
   }, [room]);
 
   return (
