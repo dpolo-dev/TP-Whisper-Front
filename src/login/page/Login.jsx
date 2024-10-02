@@ -1,11 +1,7 @@
+import SignIn from "../components/SignIn";
+
 const Login = () => {
-  console.log("Login");
-  
-  return (
-    <div>
-      <h1>Login</h1>
-    </div>
-  );
+  return <SignIn />;
 };
 
 export default Login;
