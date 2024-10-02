@@ -2,14 +2,16 @@ import { useEffect, useMemo, useState, useCallback } from "react";
 import { connect } from "twilio-video";
 import Room from "../../shared/video/Room";
 import * as videoService from "../../services/twilioService";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { CircularProgress } from "@mui/material";
 import {
   listenForRoomCreation,
   removeListeners,
 } from "../../services/socketService";
+import { logout } from "../../store/userSlice";
 
 const Client = () => {
+  const dispatch = useDispatch();
   const user = useSelector((state) => state.user.user);
 
   const [room, setRoom] = useState(null);
@@ -22,6 +24,10 @@ const Client = () => {
     () => `room_${user.username}_${user.id}`,
     [user.username, user.id]
   );
+
+  const waitForRoomFetch = async (timeout) => {
+    return new Promise((resolve) => setTimeout(resolve, timeout));
+  };
 
   const fetchRooms = useCallback(async () => {
     try {
@@ -80,16 +86,19 @@ const Client = () => {
       room.disconnect();
       setRoom(null);
       setRoomJoined(false);
+      dispatch(logout());
     }
-  }, [room]);
+  }, [dispatch, room]);
 
   const handleRoomCreationAndJoining = useCallback(async () => {
     if (roomJoined) return;
 
+    await waitForRoomFetch(1500);
+
     const existingRoom = roomList.find((r) => r.name === newRoomName);
     if (existingRoom) {
       await joinRoom(existingRoom._id);
-    } else if (roomList.length === 0) {
+    } else {
       await createRoom();
       await fetchRooms();
       const updatedRoom = roomList.find((r) => r.name === newRoomName);
