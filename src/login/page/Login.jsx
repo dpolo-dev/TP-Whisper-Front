@@ -32,31 +32,6 @@ const Card = styled(MuiCard)(({ theme }) => ({
   }),
 }));
 
-const SignInContainer = styled(Stack)(({ theme }) => ({
-  minHeight: "100vh",
-  padding: theme.spacing(2),
-  justifyContent: "center",
-  alignItems: "center",
-  position: "relative",
-  [theme.breakpoints.up("sm")]: {
-    padding: theme.spacing(4),
-  },
-  "&::before": {
-    content: '""',
-    display: "block",
-    position: "absolute",
-    zIndex: -1,
-    inset: 0,
-    backgroundImage:
-      "radial-gradient(ellipse at 50% 50%, hsl(210, 100%, 97%), hsl(0, 0%, 100%))",
-    backgroundRepeat: "no-repeat",
-    ...theme.applyStyles("dark", {
-      backgroundImage:
-        "radial-gradient(at 50% 50%, hsla(210, 100%, 16%, 0.5), hsl(220, 30%, 5%))",
-    }),
-  },
-}));
-
 export default function Login() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -130,74 +105,70 @@ export default function Login() {
   };
 
   return (
-    <SignInContainer direction="column">
-      <Card variant="outlined">
-        <Box
-          component="form"
-          onSubmit={handleSubmit}
-          noValidate
-          sx={{
-            display: "flex",
-            flexDirection: "column",
-            width: "100%",
-            gap: 2,
-          }}
-        >
-          <FormControl>
-            <FormLabel htmlFor="username">User Name</FormLabel>
-            <TextField
-              error={usernameError}
-              helperText={usernameErrorMessage}
-              id="username"
-              name="username"
-              placeholder="Enter your username"
-              autoComplete="username"
-              autoFocus
-              required
-              fullWidth
-              variant="outlined"
-              color={usernameError ? "error" : "primary"}
-              sx={{ ariaLabel: "username" }}
-            />
-          </FormControl>
-
-          <FormControl>
-            <FormLabel>User Type</FormLabel>
-            <Stack direction="row" spacing={2}>
-              <Chip
-                label="Client"
-                clickable
-                variant={selectedUserType === "client" ? "filled" : "outlined"}
-                color={selectedUserType === "client" ? "primary" : "default"}
-                onClick={() => handleUserTypeChange("client")}
-              />
-              <Chip
-                label="Customer"
-                clickable
-                variant={
-                  selectedUserType === "customer" ? "filled" : "outlined"
-                }
-                color={selectedUserType === "customer" ? "primary" : "default"}
-                onClick={() => handleUserTypeChange("customer")}
-              />
-            </Stack>
-            {userTypeError && (
-              <Box sx={{ color: "red", fontSize: "0.75rem" }}>
-                {userTypeErrorMessage}
-              </Box>
-            )}
-          </FormControl>
-
-          <Button
-            type="submit"
+    <Card variant="outlined">
+      <Box
+        component="form"
+        onSubmit={handleSubmit}
+        noValidate
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          width: "100%",
+          gap: 2,
+        }}
+      >
+        <FormControl>
+          <FormLabel htmlFor="username">User Name</FormLabel>
+          <TextField
+            error={usernameError}
+            helperText={usernameErrorMessage}
+            id="username"
+            name="username"
+            placeholder="Enter your username"
+            autoComplete="username"
+            autoFocus
+            required
             fullWidth
-            variant="contained"
-            onClick={validateInputs}
-          >
-            Sign in
-          </Button>
-        </Box>
-      </Card>
-    </SignInContainer>
+            variant="outlined"
+            color={usernameError ? "error" : "primary"}
+            sx={{ ariaLabel: "username" }}
+          />
+        </FormControl>
+
+        <FormControl>
+          <FormLabel>User Type</FormLabel>
+          <Stack direction="row" spacing={2}>
+            <Chip
+              label="Client"
+              clickable
+              variant={selectedUserType === "client" ? "filled" : "outlined"}
+              color={selectedUserType === "client" ? "primary" : "default"}
+              onClick={() => handleUserTypeChange("client")}
+            />
+            <Chip
+              label="Customer"
+              clickable
+              variant={selectedUserType === "customer" ? "filled" : "outlined"}
+              color={selectedUserType === "customer" ? "primary" : "default"}
+              onClick={() => handleUserTypeChange("customer")}
+            />
+          </Stack>
+          {userTypeError && (
+            <Box sx={{ color: "red", fontSize: "0.75rem" }}>
+              {userTypeErrorMessage}
+            </Box>
+          )}
+        </FormControl>
+
+        <Button
+          type="submit"
+          fullWidth
+          variant="contained"
+          onClick={validateInputs}
+        >
+          Sign in
+        </Button>
+      </Box>
+    </Card>
   );
 }
