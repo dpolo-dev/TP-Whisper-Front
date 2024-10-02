@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import Participant from "./Participant";
 
-const Room = ({ room, breakoutRoomList, joinRoom, leaveRoom }) => {
+const Room = ({ room, leaveRoom }) => {
   const [remoteParticipants, setRemoteParticipants] = useState(
     Array.from(room.participants.values())
   );
@@ -17,7 +17,7 @@ const Room = ({ room, breakoutRoomList, joinRoom, leaveRoom }) => {
   }, [room]);
 
   return (
-    <div className="room">
+    <div className="app room">
       <h2>{room.name}</h2>
       <div className="participants">
         <Participant
@@ -26,14 +26,6 @@ const Room = ({ room, breakoutRoomList, joinRoom, leaveRoom }) => {
         />
         {remoteParticipants.map((participant) => (
           <Participant key={participant.identity} participant={participant} />
-        ))}
-      </div>
-      <div className="breakouts-list">
-        {breakoutRoomList.length > 0 && <h3>Breakout Rooms</h3>}
-        {breakoutRoomList.map((room) => (
-          <button key={room._id} onClick={() => joinRoom(room._id, false)}>
-            {room.name}
-          </button>
         ))}
       </div>
       <button onClick={leaveRoom}>Leave Video Call</button>

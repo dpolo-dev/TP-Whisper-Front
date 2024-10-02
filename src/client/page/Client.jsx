@@ -1,84 +1,78 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState, useCallback } from "react";
 import { connect } from "twilio-video";
 import Room from "../../shared/video/Room";
 import * as videoService from "../../services/twilioService";
+import { useSelector } from "react-redux";
+import { CircularProgress } from "@mui/material";
 import {
   listenForRoomCreation,
   removeListeners,
 } from "../../services/socketService";
 
 const Client = () => {
-  const [identity, setIdentity] = useState("");
-  const [room, setRoom] = useState();
+  const user = useSelector((state) => state.user.user);
+
+  const [room, setRoom] = useState(null);
   const [roomList, setRoomList] = useState([]);
-  const [showControls, setShowControls] = useState(false);
-  const [newRoomName, setNewRoomName] = useState("");
-  const [parentSid, setParentSid] = useState("");
+  const [isFetching, setIsFetching] = useState(true);
+  const [roomJoined, setRoomJoined] = useState(false);
 
-  // Fetch room list when the component mounts
+  const identity = useMemo(() => user.username, [user.username]);
+  const newRoomName = useMemo(
+    () => `room_${user.username}_${user.id}`,
+    [user.username, user.id]
+  );
+
   useEffect(() => {
-    fetchRooms();
+    console.log(roomList);
+  }, [roomList]);
 
-    listenForRoomCreation(fetchRooms, fetchRooms);
-
-    return () => {
-      removeListeners();
-    };
-  }, []);
-
-  const fetchRooms = async () => {
+  const fetchRooms = useCallback(async () => {
     try {
       const rooms = await videoService.listRooms();
       setRoomList(rooms);
     } catch (err) {
       console.error("Error fetching rooms", err);
+    } finally {
+      setIsFetching(false);
     }
-  };
+  }, []);
 
-  const createRoom = async () => {
+  const createRoom = useCallback(async () => {
     try {
-      await videoService.createRoom(newRoomName);
-      setNewRoomName("");
+      const existingRoom = roomList.find((r) => r.name === newRoomName);
+      if (!existingRoom) {
+        await videoService.createRoom(newRoomName);
+        await fetchRooms();
+      }
     } catch (err) {
       console.error("Error creating room", err);
     }
-  };
+  }, [newRoomName, roomList, fetchRooms]);
 
-  const createBreakoutRoom = async () => {
-    if (!roomList.find((mainRoom) => room?.sid === mainRoom._id)) {
-      console.log("Creating nested breakout rooms is not yet implemented.");
-      return;
-    }
+  const joinRoom = useCallback(
+    async (roomSid) => {
+      try {
+        if (room) {
+          await room.disconnect();
+        }
 
-    try {
-      await videoService.createBreakoutRoom(newRoomName, room?.sid);
-      setNewRoomName("");
-    } catch (err) {
-      console.error("Error creating breakout room", err);
-    }
-  };
+        const accessToken = await videoService.joinRoom(identity, roomSid);
+        const videoRoom = await connect(accessToken, {
+          audio: true,
+          video: { width: 640, height: 480 },
+        });
 
-  const joinRoom = async (roomSid, breakout = false) => {
-    try {
-      if (room) {
-        await room.disconnect();
+        setRoom(videoRoom);
+        setRoomJoined(true);
+      } catch (err) {
+        console.error("Error joining room", err);
       }
+    },
+    [identity, room]
+  );
 
-      const accessToken = await videoService.joinRoom(identity, roomSid);
-
-      const videoRoom = await connect(accessToken, {
-        audio: true,
-        video: { width: 640, height: 480 },
-      });
-
-      setRoom(videoRoom);
-      if (!breakout) setParentSid(videoRoom.sid);
-    } catch (err) {
-      console.error("Error joining room", err);
-    }
-  };
-
-  const leaveRoom = async () => {
+  const leaveRoom = useCallback(() => {
     if (room) {
       room.localParticipant.tracks.forEach((publication) => {
         if (["audio", "video"].includes(publication.track.kind)) {
@@ -88,80 +82,46 @@ const Client = () => {
       });
 
       room.disconnect();
-      setRoom(undefined);
+      setRoom(null);
+      setRoomJoined(false);
     }
-  };
+  }, [room]);
 
-  const getBreakoutRooms = () => {
-    if (room) {
-      const roomInfo = roomList.find((mainRoom) => mainRoom._id === room.sid);
-      return roomInfo ? roomInfo.breakouts : [];
+  const handleRoomCreationAndJoining = useCallback(async () => {
+    if (roomJoined) return;
+
+    const existingRoom = roomList.find((r) => r.name === newRoomName);
+    if (existingRoom) {
+      await joinRoom(existingRoom.sid);
+    } else if (roomList.length === 0) {
+      await createRoom();
+      const updatedRoom = roomList.find((r) => r.name === newRoomName);
+      if (updatedRoom) {
+        await joinRoom(updatedRoom.sid);
+      }
     }
-    return [];
-  };
+  }, [newRoomName, roomList, roomJoined, createRoom, joinRoom]);
 
-  return (
-    <div className="app">
-      <label className="start">
-        <input
-          type="checkbox"
-          checked={showControls}
-          onChange={() => setShowControls(!showControls)}
-        />
-        Show Room Controls
-      </label>
+  useEffect(() => {
+    fetchRooms();
 
-      {showControls && (
-        <div className="controls">
-          <label className="start">
-            Name your room:
-            <input
-              value={newRoomName}
-              onChange={(e) => setNewRoomName(e.target.value)}
-            />
-          </label>
-          <button
-            disabled={!newRoomName}
-            onClick={room ? createBreakoutRoom : createRoom}
-          >
-            {room ? "Create Breakout Room" : "Create Room"}
-          </button>
-        </div>
-      )}
-      {room === undefined ? (
-        <div className="start">
-          <input
-            value={identity}
-            onChange={(e) => setIdentity(e.target.value)}
-            placeholder="Enter your name"
-          />
-        </div>
-      ) : (
-        <Room
-          room={room}
-          joinRoom={joinRoom}
-          leaveRoom={leaveRoom}
-          breakoutRoomList={getBreakoutRooms()}
-          parentSid={parentSid}
-        />
-      )}
+    listenForRoomCreation(fetchRooms, fetchRooms);
 
-      <div className="video-rooms-list">
-        {room == null && roomList.length > 0 && (
-          <h3>Video Rooms - Click a button to join</h3>
-        )}
-        {room == null &&
-          roomList.map((room) => (
-            <button
-              key={room._id}
-              disabled={!identity}
-              onClick={() => joinRoom(room._id)}
-            >
-              {room.name}
-            </button>
-          ))}
-      </div>
-    </div>
+    return () => {
+      removeListeners();
+    };
+  }, [fetchRooms]);
+
+  useEffect(() => {
+    if (!isFetching) {
+      handleRoomCreationAndJoining();
+    }
+  }, [roomList, isFetching, handleRoomCreationAndJoining]);
+
+  return !room ? (
+    <CircularProgress />
+  ) : (
+    <Room room={room} leaveRoom={leaveRoom} />
   );
 };
 
