@@ -1,7 +1,7 @@
 /* eslint-disable react/prop-types */
 import { useEffect, useRef, useState } from "react";
 
-const Participant = ({ participant }) => {
+const Participant = ({ isLocal, participant }) => {
   const [videoTracks, setVideoTracks] = useState([]);
   const [audioTracks, setAudioTracks] = useState([]);
   const videoRef = useRef(null);
@@ -65,7 +65,7 @@ const Participant = ({ participant }) => {
 
   return (
     <div className="participant" id={participant.identity}>
-      <div className="identity">{participant.identity}</div>
+      <div className="identity">{participant.identity} {isLocal && '(me)'}</div>
       <video ref={videoRef} autoPlay />
       <audio ref={audioRef} autoPlay muted />
     </div>
