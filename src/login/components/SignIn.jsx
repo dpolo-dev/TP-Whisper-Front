@@ -3,10 +3,11 @@ import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import FormLabel from "@mui/material/FormLabel";
 import FormControl from "@mui/material/FormControl";
-import TextField from "@mui/material/TextField";
 import Stack from "@mui/material/Stack";
 import MuiCard from "@mui/material/Card";
 import { styled } from "@mui/material/styles";
+import Chip from "@mui/material/Chip";
+import { TextField } from "@mui/material";
 
 const Card = styled(MuiCard)(({ theme }) => ({
   display: "flex",
@@ -28,8 +29,11 @@ const Card = styled(MuiCard)(({ theme }) => ({
 }));
 
 const SignInContainer = styled(Stack)(({ theme }) => ({
-  minHeight: "100%",
+  minHeight: "100vh",
   padding: theme.spacing(2),
+  justifyContent: "center",
+  alignItems: "center",
+  position: "relative",
   [theme.breakpoints.up("sm")]: {
     padding: theme.spacing(4),
   },
@@ -50,52 +54,58 @@ const SignInContainer = styled(Stack)(({ theme }) => ({
 }));
 
 export default function SignIn() {
-  const [emailError, setEmailError] = React.useState(false);
-  const [emailErrorMessage, setEmailErrorMessage] = React.useState("");
-  const [passwordError, setPasswordError] = React.useState(false);
-  const [passwordErrorMessage, setPasswordErrorMessage] = React.useState("");
+  const [usernameError, setUsernameError] = React.useState(false);
+  const [usernameErrorMessage, setUsernameErrorMessage] = React.useState("");
+  const [userTypeError, setUserTypeError] = React.useState(false);
+  const [userTypeErrorMessage, setUserTypeErrorMessage] = React.useState("");
+  const [selectedUserType, setSelectedUserType] = React.useState("");
 
   const handleSubmit = (event) => {
-    if (emailError || passwordError) {
-      event.preventDefault();
+    event.preventDefault();
+    if (!validateInputs()) {
       return;
     }
     const data = new FormData(event.currentTarget);
+    const username = data.get("username");
     console.log({
-      email: data.get("email"),
-      password: data.get("password"),
+      username,
+      userType: selectedUserType,
     });
   };
 
   const validateInputs = () => {
-    const email = document.getElementById("email");
-    const password = document.getElementById("password");
-
+    const username = document.getElementById("username").value;
     let isValid = true;
 
-    if (!email.value || !/\S+@\S+\.\S+/.test(email.value)) {
-      setEmailError(true);
-      setEmailErrorMessage("Please enter a valid email address.");
+    // Validación de username
+    if (!username || username.length < 3) {
+      setUsernameError(true);
+      setUsernameErrorMessage("Username must be at least 3 characters long.");
       isValid = false;
     } else {
-      setEmailError(false);
-      setEmailErrorMessage("");
+      setUsernameError(false);
+      setUsernameErrorMessage("");
     }
 
-    if (!password.value || password.value.length < 6) {
-      setPasswordError(true);
-      setPasswordErrorMessage("Password must be at least 6 characters long.");
+    // Validación de tipo de usuario
+    if (!selectedUserType) {
+      setUserTypeError(true);
+      setUserTypeErrorMessage("Please select a user type.");
       isValid = false;
     } else {
-      setPasswordError(false);
-      setPasswordErrorMessage("");
+      setUserTypeError(false);
+      setUserTypeErrorMessage("");
     }
 
     return isValid;
   };
 
+  const handleUserTypeChange = (userType) => {
+    setSelectedUserType(userType);
+  };
+
   return (
-    <SignInContainer direction="column" justifyContent="space-between">
+    <SignInContainer direction="column">
       <Card variant="outlined">
         <Box
           component="form"
@@ -109,42 +119,50 @@ export default function SignIn() {
           }}
         >
           <FormControl>
-            <FormLabel htmlFor="email">Email</FormLabel>
+            <FormLabel htmlFor="username">User Name</FormLabel>
             <TextField
-              error={emailError}
-              helperText={emailErrorMessage}
-              id="email"
-              type="email"
-              name="email"
-              placeholder="your@email.com"
-              autoComplete="email"
+              error={usernameError}
+              helperText={usernameErrorMessage}
+              id="username"
+              name="username"
+              placeholder="Enter your username"
+              autoComplete="username"
               autoFocus
               required
               fullWidth
               variant="outlined"
-              color={emailError ? "error" : "primary"}
-              sx={{ ariaLabel: "email" }}
+              color={usernameError ? "error" : "primary"}
+              sx={{ ariaLabel: "username" }}
             />
           </FormControl>
+
           <FormControl>
-            <Box sx={{ display: "flex", justifyContent: "space-between" }}>
-              <FormLabel htmlFor="password">Password</FormLabel>
-            </Box>
-            <TextField
-              error={passwordError}
-              helperText={passwordErrorMessage}
-              name="password"
-              placeholder="••••••"
-              type="password"
-              id="password"
-              autoComplete="current-password"
-              autoFocus
-              required
-              fullWidth
-              variant="outlined"
-              color={passwordError ? "error" : "primary"}
-            />
+            <FormLabel>User Type</FormLabel>
+            <Stack direction="row" spacing={2}>
+              <Chip
+                label="Client"
+                clickable
+                variant={selectedUserType === "client" ? "filled" : "outlined"}
+                color={selectedUserType === "client" ? "primary" : "default"}
+                onClick={() => handleUserTypeChange("client")}
+              />
+              <Chip
+                label="Customer"
+                clickable
+                variant={
+                  selectedUserType === "customer" ? "filled" : "outlined"
+                }
+                color={selectedUserType === "customer" ? "primary" : "default"}
+                onClick={() => handleUserTypeChange("customer")}
+              />
+            </Stack>
+            {userTypeError && (
+              <Box sx={{ color: "red", fontSize: "0.75rem" }}>
+                {userTypeErrorMessage}
+              </Box>
+            )}
           </FormControl>
+
           <Button
             type="submit"
             fullWidth
