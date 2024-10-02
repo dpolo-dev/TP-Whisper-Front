@@ -6,12 +6,7 @@ const Client = () => {
 
   const roomName = `room_${user.username}_${user.id}`;
 
-  return (
-    <div>
-      <h1>Client Dashboard</h1>
-      <VideoComponent roomName={roomName} user={user} />
-    </div>
-  );
+  return <VideoComponent roomName={roomName} user={user} />;
 };
 
 export default Client;
