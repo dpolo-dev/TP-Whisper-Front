@@ -33,8 +33,11 @@ const Participant = ({ isLocal, participant }) => {
 
   const handleNewTranscription = (newText) => {
     setTranscriptions((prev) => {
-      if (prev.length === 0 || prev[prev.length - 1] !== newText?.text) {
-        return [newText?.text, ...prev];
+      if (
+        prev.length === 0 ||
+        prev[prev.length - 1].trim() !== newText.trim()
+      ) {
+        return [newText.trim(), ...prev];
       }
 
       return prev;
@@ -115,13 +118,13 @@ const Participant = ({ isLocal, participant }) => {
           recorder.stop();
           recorder.start();
         }
-      }, 5000);
+      }, 1000);
 
       return () => {
         clearInterval(intervalId);
-        if (recorder.state !== "inactive") {
-          recorder.stop();
-        }
+        // if (recorder.state !== "inactive") {
+        //   recorder.stop();
+        // }
       };
     }
   }, [audioTracks, participant, selectedLanguage, selectedModel]);
