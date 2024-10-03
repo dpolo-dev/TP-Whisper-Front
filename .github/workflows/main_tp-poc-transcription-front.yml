@@ -1,4 +1,7 @@
-name: Build and deploy Node.js app to Azure Web App - TP-POC-ACS-FRONT
+# Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
+# More GitHub Actions for Azure: https://github.com/Azure/actions
+
+name: Build and deploy Node.js app to Azure Web App - TP-POC-Transcription-front
 
 on:
   push:
@@ -60,7 +63,7 @@ jobs:
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v3
         with:
-          app-name: "TP-POC-ACS-FRONT"
+          app-name: "TP-POC-Transcription-front"
           slot-name: "Production"
           package: release.zip
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_50A54B191C714E08AFBF940A108EFCD9 }}
