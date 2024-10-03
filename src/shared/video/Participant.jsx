@@ -1,8 +1,11 @@
 /* eslint-disable react/prop-types */
-import { useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import socket from "../../services/socketService";
+import { LanguageContext } from "../../context/LanguageContext";
 
 const Participant = ({ isLocal, participant }) => {
+  const { selectedLanguage } = useContext(LanguageContext);
+
   const [videoTracks, setVideoTracks] = useState([]);
   const [audioTracks, setAudioTracks] = useState([]);
   const [transcriptions, setTranscriptions] = useState([]);
@@ -75,10 +78,12 @@ const Participant = ({ isLocal, participant }) => {
 
   useEffect(() => {
     const audioTrack = audioTracks[0];
+    let mediaRecorder;
+
     if (audioTrack) {
       const mediaStream = new MediaStream([audioTrack.mediaStreamTrack]);
 
-      const mediaRecorder = new MediaRecorder(mediaStream);
+      mediaRecorder = new MediaRecorder(mediaStream);
 
       mediaRecorder.ondataavailable = (event) => {
         const audioBlob = event.data;
@@ -89,6 +94,7 @@ const Participant = ({ isLocal, participant }) => {
 
           socket.emit("transcribe_audio", {
             participant: participant.identity,
+            language: selectedLanguage,
             audioData,
           });
         };
@@ -96,13 +102,15 @@ const Participant = ({ isLocal, participant }) => {
         reader.readAsArrayBuffer(audioBlob);
       };
 
-      mediaRecorder.start(500);
+      mediaRecorder.start(1000);
 
       return () => {
-        mediaRecorder.stop();
+        if (mediaRecorder && mediaRecorder.state !== "inactive") {
+          mediaRecorder.stop();
+        }
       };
     }
-  }, [audioTracks, participant]);
+  }, [audioTracks, participant, selectedLanguage]);
 
   useEffect(() => {
     socket.on(`transcription_${participant.identity}`, (data) => {
