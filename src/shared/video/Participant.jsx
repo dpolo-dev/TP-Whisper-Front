@@ -30,7 +30,13 @@ const Participant = ({ isLocal, participant }) => {
   };
 
   const handleNewTranscription = (newText) => {
-    setTranscriptions((prev) => [...prev, newText]);
+    setTranscriptions((prev) => {
+      if (prev.length === 0 || prev[prev.length - 1] !== newText?.text) {
+        return [newText?.text, ...prev];
+      }
+
+      return prev;
+    });
   };
 
   useEffect(() => {
