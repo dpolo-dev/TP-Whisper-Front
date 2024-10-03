@@ -1,3 +1,3 @@
-export const apiUrl = import.meta.env.VITE_API_URL
-export const regionSpeech = import.meta.env.VITE_REGION_SPEECH
-export const subscriptionKeySpeech = import.meta.env.VITE_SUBCRIPTION_KEY_SPEECH
+export const apiUrl = 'http://tp-poc-transcription-back-db-bghta2h7hcgfabbb.westus-01.azurewebsites.net'
+export const regionSpeech = 'eastus'
+export const subscriptionKeySpeech = 'b17af7176cdc4c5994584beda1d50905'

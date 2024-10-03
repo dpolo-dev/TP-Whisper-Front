@@ -19,6 +19,9 @@ import "./style/global.css";
 import { LanguageProvider } from "./context/LanguageContext";
 import LanguageSelector from "./shared/customizations/LanguageSelector";
 import { ModelProvider } from "./context/ModelContext";
+import { version } from "../package.json";
+import Box from "@mui/material/Box";
+import { Chip } from "@mui/material";
 
 const AppContainer = styled(Stack)(({ theme }) => ({
   minHeight: "100vh",
@@ -44,9 +47,26 @@ const AppContainer = styled(Stack)(({ theme }) => ({
   },
 }));
 
+const renderVersion = (
+  <Box
+    sx={{
+      display: "flex",
+      alignItems: "center",
+      zIndex: 9,
+      position: "fixed",
+      bottom: 16,
+      left: 16,
+    }}
+  >
+    <Chip label={`v${version}`} size="small" />
+  </Box>
+);
+
 export default function App() {
   return (
     <AppTheme>
+      {renderVersion}
+
       <AppContainer>
         <Provider store={store}>
           <LanguageProvider>
