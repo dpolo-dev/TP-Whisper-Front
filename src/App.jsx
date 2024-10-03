@@ -18,6 +18,7 @@ import { brand, gray } from "./shared/themePrimitives";
 import "./style/global.css";
 import { LanguageProvider } from "./context/LanguageContext";
 import LanguageSelector from "./shared/customizations/LanguageSelector";
+import { ModelProvider } from "./context/ModelContext";
 
 const AppContainer = styled(Stack)(({ theme }) => ({
   minHeight: "100vh",
@@ -49,31 +50,33 @@ export default function App() {
       <AppContainer>
         <Provider store={store}>
           <LanguageProvider>
-            <CssBaseline />
-            <LanguageSelector />
+            <ModelProvider>
+              <CssBaseline />
+              <LanguageSelector />
 
-            <Router>
-              <Routes>
-                <Route path="/login" element={<Login />} />
-                <Route
-                  path="/client"
-                  element={
-                    <PrivateRoute allowedUserType="client">
-                      <Client />
-                    </PrivateRoute>
-                  }
-                />
-                <Route
-                  path="/customer"
-                  element={
-                    <PrivateRoute allowedUserType="customer">
-                      <Customer />
-                    </PrivateRoute>
-                  }
-                />
-                <Route path="*" element={<Navigate to="/login" replace />} />
-              </Routes>
-            </Router>
+              <Router>
+                <Routes>
+                  <Route path="/login" element={<Login />} />
+                  <Route
+                    path="/client"
+                    element={
+                      <PrivateRoute allowedUserType="client">
+                        <Client />
+                      </PrivateRoute>
+                    }
+                  />
+                  <Route
+                    path="/customer"
+                    element={
+                      <PrivateRoute allowedUserType="customer">
+                        <Customer />
+                      </PrivateRoute>
+                    }
+                  />
+                  <Route path="*" element={<Navigate to="/login" replace />} />
+                </Routes>
+              </Router>
+            </ModelProvider>
           </LanguageProvider>
         </Provider>
       </AppContainer>

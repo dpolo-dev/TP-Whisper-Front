@@ -9,6 +9,8 @@ import {
   removeListeners,
 } from "../../services/socketService";
 import { logout } from "../../store/userSlice";
+import LogoutButton from "../../shared/customizations/LogoutButton";
+import ModelSelect from "../../shared/customizations/ModelSelect";
 
 const Client = () => {
   const dispatch = useDispatch();
@@ -124,10 +126,17 @@ const Client = () => {
     }
   }, [roomList, isFetching, handleRoomCreationAndJoining]);
 
-  return !room ? (
-    <CircularProgress />
-  ) : (
-    <Room room={room} leaveRoom={leaveRoom} />
+  return (
+    <>
+      <LogoutButton />
+      <ModelSelect />
+
+      {!room ? (
+        <CircularProgress />
+      ) : (
+        <Room room={room} leaveRoom={leaveRoom} />
+      )}
+    </>
   );
 };
 

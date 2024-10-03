@@ -8,6 +8,8 @@ import {
 } from "../../services/socketService";
 import { useSelector } from "react-redux";
 import RefreshIcon from "@mui/icons-material/Refresh";
+import LogoutButton from "../../shared/customizations/LogoutButton";
+import ModelSelect from "../../shared/customizations/ModelSelect";
 
 const generateRoomName = (roomName) => {
   const parts = roomName.split("_");
@@ -103,6 +105,9 @@ const Customer = () => {
 
   return (
     <>
+      <LogoutButton />
+      <ModelSelect />
+
       {!!room && (
         <Room
           room={room}

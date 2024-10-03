@@ -3,9 +3,11 @@ import { useContext, useEffect, useRef, useState } from "react";
 import socket from "../../services/socketService";
 import { LanguageContext } from "../../context/LanguageContext";
 import { convertBlobToWav } from "../../utils/audioConvert";
+import { ModelContext } from "../../context/ModelContext";
 
 const Participant = ({ isLocal, participant }) => {
   const { selectedLanguage } = useContext(LanguageContext);
+  const { selectedModel } = useContext(ModelContext);
 
   const [videoTracks, setVideoTracks] = useState([]);
   const [audioTracks, setAudioTracks] = useState([]);
@@ -101,6 +103,7 @@ const Participant = ({ isLocal, participant }) => {
             participant: participant.identity,
             language: selectedLanguage,
             audioData: arrayBuffer,
+            model: selectedModel,
           });
         }
       });
@@ -121,7 +124,7 @@ const Participant = ({ isLocal, participant }) => {
         }
       };
     }
-  }, [audioTracks, participant, selectedLanguage]);
+  }, [audioTracks, participant, selectedLanguage, selectedModel]);
 
   useEffect(() => {
     socket.on(`transcription_${participant.identity}`, (data) => {
