@@ -1,159 +1,46 @@
 /* eslint-disable react/prop-types */
-import { useContext, useEffect, useRef, useState } from "react";
-import socket from "../../services/socketService";
+import { useContext,  useRef, useState, useCallback } from "react";
 import { LanguageContext } from "../../context/LanguageContext";
-import { convertBlobToWav } from "../../utils/audioConvert";
 import { ModelContext } from "../../context/ModelContext";
-import { transcribeAudio } from "../../services/azureService";
+import { useParticipantTracks } from "../../hook/useParticipantTracks";
+import { useTrackAttachment } from "../../hook/useTrackAttachment";
+import { useTranscription } from "../../hook/useTranscription";
+import { useSocketTranscription } from "../../hook/useSocketTranscription";
 
 const Participant = ({ isLocal, participant }) => {
   const { selectedLanguage } = useContext(LanguageContext);
   const { selectedModel } = useContext(ModelContext);
 
-  const [videoTracks, setVideoTracks] = useState([]);
-  const [audioTracks, setAudioTracks] = useState([]);
   const [transcriptions, setTranscriptions] = useState([]);
   const videoRef = useRef(null);
   const audioRef = useRef(null);
 
-  const trackSubscribed = (track) => {
-    if (track.kind === "video") {
-      setVideoTracks((prev) => [...prev, track]);
-    } else if (track.kind === "audio") {
-      setAudioTracks((prev) => [...prev, track]);
-    }
-  };
+  const { videoTracks, audioTracks } = useParticipantTracks(participant);
 
-  const trackUnsubscribed = (track) => {
-    if (track.kind === "video") {
-      setVideoTracks((prev) => prev.filter((t) => t !== track));
-    } else if (track.kind === "audio") {
-      setAudioTracks((prev) => prev.filter((t) => t !== track));
-    }
-  };
+  useTrackAttachment(videoTracks, videoRef);
+  useTrackAttachment(audioTracks, audioRef);
 
-  const handleNewTranscription = (newText) => {
-    setTranscriptions((prev) => {
-      if (
-        prev.length === 0 ||
-        prev[prev.length - 1].trim() !== newText.trim()
-      ) {
-        return [newText.trim(), ...prev];
-      }
-
-      return prev;
-    });
-  };
-
-  useEffect(() => {
-    setVideoTracks(
-      Array.from(participant.videoTracks.values())
-        .map((pub) => pub.track)
-        .filter((track) => track)
-    );
-    setAudioTracks(
-      Array.from(participant.audioTracks.values())
-        .map((pub) => pub.track)
-        .filter((track) => track)
-    );
-
-    participant.on("trackSubscribed", trackSubscribed);
-    participant.on("trackUnsubscribed", trackUnsubscribed);
-
-    return () => {
-      participant.removeAllListeners();
-    };
-  }, [participant]);
-
-  useEffect(() => {
-    const videoTrack = videoTracks[0];
-    if (videoTrack) {
-      videoTrack.attach(videoRef.current);
-      return () => {
-        videoTrack.detach();
-      };
-    }
-  }, [videoTracks]);
-
-  useEffect(() => {
-    const audioTrack = audioTracks[0];
-    if (audioTrack) {
-      audioTrack.attach(audioRef.current);
-      return () => {
-        audioTrack.detach();
-      };
-    }
-  }, [audioTracks]);
-
-  useEffect(() => {
-    const audioTrack = audioTracks[0];
-
-    if (audioTrack) {
-      const stream = new MediaStream([audioTrack.mediaStreamTrack]);
-      const mimeType = "audio/webm";
-      const recorder = new MediaRecorder(stream, { mimeType });
-
-      let intervalId;
-
-      recorder.addEventListener("dataavailable", async (event) => {
-        if (event.data.size > 0) {
-          const audioBlob = new Blob([event.data], { type: mimeType });
-
-          const wavBlob = await convertBlobToWav(audioBlob);
-
-          const arrayBuffer = await wavBlob.arrayBuffer();
-
-          if (selectedModel === "Whisper") {
-            socket.emit("transcribe_audio", {
-              participant: participant.identity,
-              language: selectedLanguage,
-              audioData: arrayBuffer,
-              model: selectedModel,
-            });
-          } else if (selectedModel === "Azure") {
-            try {
-              const transcriptionResult = await transcribeAudio(
-                audioBlob,
-                selectedLanguage
-              );
-
-              handleNewTranscription(
-                transcriptionResult.combinedPhrases[0].text
-              );
-            } catch (error) {
-              console.error("Error during transcription:", error);
-            }
-          }
+  const handleNewTranscription = useCallback(
+    (newText) => {
+      setTranscriptions((prev) => {
+        if (prev.length === 0 || prev[0].trim() !== newText.trim()) {
+          return [newText.trim(), ...prev];
         }
+        return prev;
       });
+    },
+    [setTranscriptions]
+  );
 
-      recorder.start();
+  useTranscription(
+    audioTracks,
+    participant,
+    selectedLanguage,
+    selectedModel,
+    handleNewTranscription
+  );
 
-      intervalId = setInterval(() => {
-        if (recorder.state === "recording") {
-          recorder.stop();
-          recorder.start();
-        }
-      }, 1500);
-
-      return () => {
-        clearInterval(intervalId);
-        if (recorder.state !== "inactive") {
-          recorder.stop();
-        }
-      };
-    }
-  }, [audioTracks, participant, selectedLanguage, selectedModel]);
-
-  useEffect(() => {
-    socket.on(`transcription_${participant.identity}`, (data) => {
-      handleNewTranscription(data.transcription);
-    });
-
-    return () => {
-      socket.off(`transcription_${participant.identity}`);
-    };
-  }, [participant.identity]);
+  useSocketTranscription(participant.identity, handleNewTranscription);
 
   return (
     <div className="participant" id={participant.identity}>
