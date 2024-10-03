@@ -4,6 +4,7 @@ import socket from "../../services/socketService";
 import { LanguageContext } from "../../context/LanguageContext";
 import { convertBlobToWav } from "../../utils/audioConvert";
 import { ModelContext } from "../../context/ModelContext";
+import { transcribeAudio } from "../../services/azureService";
 
 const Participant = ({ isLocal, participant }) => {
   const { selectedLanguage } = useContext(LanguageContext);
@@ -102,12 +103,27 @@ const Participant = ({ isLocal, participant }) => {
 
           const arrayBuffer = await wavBlob.arrayBuffer();
 
-          socket.emit("transcribe_audio", {
-            participant: participant.identity,
-            language: selectedLanguage,
-            audioData: arrayBuffer,
-            model: selectedModel,
-          });
+          if (selectedModel === "Whisper") {
+            socket.emit("transcribe_audio", {
+              participant: participant.identity,
+              language: selectedLanguage,
+              audioData: arrayBuffer,
+              model: selectedModel,
+            });
+          } else if (selectedModel === "Azure") {
+            try {
+              const transcriptionResult = await transcribeAudio(
+                audioBlob,
+                selectedLanguage
+              );
+
+              handleNewTranscription(
+                transcriptionResult.combinedPhrases[0].text
+              );
+            } catch (error) {
+              console.error("Error during transcription:", error);
+            }
+          }
         }
       });
 
@@ -118,13 +134,13 @@ const Participant = ({ isLocal, participant }) => {
           recorder.stop();
           recorder.start();
         }
-      }, 1000);
+      }, 1500);
 
       return () => {
         clearInterval(intervalId);
-        // if (recorder.state !== "inactive") {
-        //   recorder.stop();
-        // }
+        if (recorder.state !== "inactive") {
+          recorder.stop();
+        }
       };
     }
   }, [audioTracks, participant, selectedLanguage, selectedModel]);

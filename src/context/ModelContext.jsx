@@ -4,7 +4,7 @@ import { createContext, useState } from "react";
 export const ModelContext = createContext();
 
 export const ModelProvider = ({ children }) => {
-  const [selectedModel, setSelectedModel] = useState("Whisper");
+  const [selectedModel, setSelectedModel] = useState("Azure");
 
   return (
     <ModelContext.Provider value={{ selectedModel, setSelectedModel }}>

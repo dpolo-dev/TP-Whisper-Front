@@ -25,7 +25,7 @@ const ModelSelect = () => {
           label="Model"
         >
           <MenuItem value="Whisper">Whisper</MenuItem>
-          <MenuItem value="Google">Google</MenuItem>
+          {/* <MenuItem value="Google">Google</MenuItem> */}
           <MenuItem value="Azure">Azure</MenuItem>
         </Select>
       </FormControl>
