@@ -30,10 +30,6 @@ const Participant = ({ isLocal, participant }) => {
 
   const handleNewTranscription = (newText) => {
     setTranscriptions((prev) => [...prev, newText]);
-
-    setTimeout(() => {
-      setTranscriptions((prev) => prev.slice(1));
-    }, 5000);
   };
 
   useEffect(() => {
@@ -78,35 +74,39 @@ const Participant = ({ isLocal, participant }) => {
 
   useEffect(() => {
     const audioTrack = audioTracks[0];
-    let mediaRecorder;
 
     if (audioTrack) {
-      const mediaStream = new MediaStream([audioTrack.mediaStreamTrack]);
+      const stream = new MediaStream([audioTrack.mediaStreamTrack]);
+      const mimeType = "audio/webm";
+      const recorder = new MediaRecorder(stream, { mimeType });
 
-      mediaRecorder = new MediaRecorder(mediaStream);
+      let intervalId;
 
-      mediaRecorder.ondataavailable = (event) => {
-        const audioBlob = event.data;
-        const reader = new FileReader();
-
-        reader.onloadend = () => {
-          const audioData = reader.result;
+      recorder.addEventListener("dataavailable", (event) => {
+        if (event.data.size > 0) {
+          const audioBlob = new Blob([event.data], { type: mimeType });
 
           socket.emit("transcribe_audio", {
             participant: participant.identity,
             language: selectedLanguage,
-            audioData,
+            audioBlob,
           });
-        };
+        }
+      });
 
-        reader.readAsArrayBuffer(audioBlob);
-      };
+      recorder.start();
 
-      mediaRecorder.start(1000);
+      intervalId = setInterval(() => {
+        if (recorder.state === "recording") {
+          recorder.stop();
+          recorder.start();
+        }
+      }, 5000);
 
       return () => {
-        if (mediaRecorder && mediaRecorder.state !== "inactive") {
-          mediaRecorder.stop();
+        clearInterval(intervalId);
+        if (recorder.state !== "inactive") {
+          recorder.stop();
         }
       };
     }
@@ -122,16 +122,6 @@ const Participant = ({ isLocal, participant }) => {
     };
   }, [participant.identity]);
 
-  useEffect(() => {
-    if (transcriptions.length > 0) {
-      const lastTranscription = transcriptions[transcriptions.length - 1];
-      const timer = setTimeout(() => {
-        document.getElementById(lastTranscription.id).classList.add("fade-out");
-      }, 2000);
-
-      return () => clearTimeout(timer);
-    }
-  }, [transcriptions]);
 
   return (
     <div className="participant" id={participant.identity}>
