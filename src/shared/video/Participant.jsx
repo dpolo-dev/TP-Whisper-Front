@@ -2,6 +2,7 @@
 import { useContext, useEffect, useRef, useState } from "react";
 import socket from "../../services/socketService";
 import { LanguageContext } from "../../context/LanguageContext";
+import { convertBlobToWav } from "../../utils/audioConvert";
 
 const Participant = ({ isLocal, participant }) => {
   const { selectedLanguage } = useContext(LanguageContext);
@@ -82,14 +83,18 @@ const Participant = ({ isLocal, participant }) => {
 
       let intervalId;
 
-      recorder.addEventListener("dataavailable", (event) => {
+      recorder.addEventListener("dataavailable", async (event) => {
         if (event.data.size > 0) {
           const audioBlob = new Blob([event.data], { type: mimeType });
+
+          const wavBlob = await convertBlobToWav(audioBlob);
+
+          const arrayBuffer = await wavBlob.arrayBuffer();
 
           socket.emit("transcribe_audio", {
             participant: participant.identity,
             language: selectedLanguage,
-            audioBlob,
+            audioData: arrayBuffer,
           });
         }
       });
@@ -121,7 +126,6 @@ const Participant = ({ isLocal, participant }) => {
       socket.off(`transcription_${participant.identity}`);
     };
   }, [participant.identity]);
-
 
   return (
     <div className="participant" id={participant.identity}>
