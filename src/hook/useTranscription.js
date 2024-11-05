@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import socket from "../services/socketService";
-import { transcribeAudio } from "../services/azureService";
+import { transcribeAndTranslateAudio } from "../services/azureService";
 import { convertBlobToWav } from "../utils/audioConvert";
 
 export function useTranscription(
@@ -35,13 +35,12 @@ export function useTranscription(
             });
           } else if (selectedModel === "Azure") {
             try {
-              const transcriptionResult = await transcribeAudio(
+              const transcriptionResult = await transcribeAndTranslateAudio(
                 audioBlob,
                 selectedLanguage
               );
-              handleNewTranscription(
-                transcriptionResult.combinedPhrases[0].text
-              );
+
+              handleNewTranscription(transcriptionResult);
             } catch (error) {
               console.error("Error during transcription:", error);
             }
@@ -56,7 +55,7 @@ export function useTranscription(
           recorder.stop();
           recorder.start();
         }
-      }, 1500);
+      }, 2500);
 
       return () => {
         clearInterval(intervalId);
