@@ -5,11 +5,7 @@ import {
   regionTranslation,
 } from "../../general-config";
 
-export const transcribeAndTranslateAudio = async (
-  audioFile,
-  language = "es",
-  targetLanguage = "en"
-) => {
+const transcribeAudio = async (audioFile, language) => {
   const transcriptionUrl = `https://${regionSpeech}.api.cognitive.microsoft.com/speechtotext/transcriptions:transcribe?api-version=2024-05-15-preview`;
   const formData = new FormData();
   formData.append("audio", audioFile);
@@ -22,7 +18,7 @@ export const transcribeAndTranslateAudio = async (
     })
   );
 
-  const transcriptionResponse = await fetch(transcriptionUrl, {
+  const response = await fetch(transcriptionUrl, {
     method: "POST",
     headers: {
       "Ocp-Apim-Subscription-Key": subscriptionKeySpeech,
@@ -31,30 +27,41 @@ export const transcribeAndTranslateAudio = async (
     body: formData,
   });
 
-  if (!transcriptionResponse.ok) throw new Error("Transcription failed");
-  const transcribedText = (await transcriptionResponse.json())
-    .combinedPhrases[0].text;
+  if (!response.ok) throw new Error("Transcription failed");
 
+  const data = await response.json();
+  return data.combinedPhrases[0]?.text ?? "";
+};
+
+const translateText = async (text, targetLanguage) => {
+  const translationUrl = `https://api.cognitive.microsofttranslator.com/translate?api-version=3.0&to=${targetLanguage}`;
+  const response = await fetch(translationUrl, {
+    method: "POST",
+    headers: {
+      "Ocp-Apim-Subscription-Key": subscriptionKeyTranslation,
+      "Ocp-Apim-Subscription-Region": regionTranslation,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify([{ Text: text }]),
+  });
+
+  if (!response.ok) throw new Error("Translation failed");
+
+  const data = await response.json();
+  return data[0].translations[0]?.text ?? "";
+};
+
+export const transcribeAndTranslateAudio = async (
+  audioFile,
+  language = "es",
+  targetLanguage = "en"
+) => {
   try {
-    const translationResponse = await fetch(
-      `https://api.cognitive.microsofttranslator.com/translate?api-version=3.0&to=${targetLanguage}`,
-      {
-        method: "POST",
-        headers: {
-          "Ocp-Apim-Subscription-Key": subscriptionKeyTranslation,
-          "Ocp-Apim-Subscription-Region": regionTranslation,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify([{ Text: transcribedText }]),
-      }
-    );
-
-    if (!translationResponse.ok) throw new Error("Translation failed");
-    const translatedText = (await translationResponse.json())[0].translations[0]
-      .text;
+    const transcribedText = await transcribeAudio(audioFile, language);
+    const translatedText = await translateText(transcribedText, targetLanguage);
     return translatedText;
   } catch (error) {
-    console.error("Translation error:", error);
-    return transcribedText;
+    console.error("Error:", error);
+    return "";
   }
 };
