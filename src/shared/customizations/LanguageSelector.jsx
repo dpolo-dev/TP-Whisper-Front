@@ -1,36 +1,51 @@
-import { useContext } from 'react';
-import SpainFlag from './../../asset/flags/es.svg';
-import FranceFlag from './../../asset/flags/fr.svg';
-import UKFlag from './../../asset/flags/gb.svg';
-import { LanguageContext } from '../../context/LanguageContext';
+import { useContext } from "react";
+import SpainFlag from "./../../asset/flags/es.svg";
+import FranceFlag from "./../../asset/flags/fr.svg";
+import UKFlag from "./../../asset/flags/gb.svg";
+import { LanguageContext } from "../../context/LanguageContext";
+
+const flags = [
+  { src: SpainFlag, alt: "Spain", code: "es" },
+  { src: FranceFlag, alt: "France", code: "fr" },
+  { src: UKFlag, alt: "United Kingdom", code: "en" },
+];
+
+const FlagSelector = ({ currentLanguage, onSelect }) => {
+  return flags.map((flag) => (
+    <img
+      key={flag.code}
+      src={flag.src}
+      alt={flag.alt}
+      className={`flag ${currentLanguage === flag.code ? "selected" : ""}`}
+      onClick={() => onSelect(flag.code)}
+    />
+  ));
+};
 
 const LanguageSelector = () => {
-  const { selectedLanguage, setSelectedLanguage } = useContext(LanguageContext);
-
-  const handleLanguageChange = (language) => {
-    setSelectedLanguage(language);
-  };
+  const {
+    selectedLanguage,
+    setSelectedLanguage,
+    targetLanguage,
+    setTargetLanguage,
+  } = useContext(LanguageContext);
 
   return (
-    <div className="language-selector">
-      <img
-        src={SpainFlag}
-        alt="Spain"
-        className={`flag ${selectedLanguage === 'es' ? 'selected' : ''}`}
-        onClick={() => handleLanguageChange('es')}
-      />
-      <img
-        src={FranceFlag}
-        alt="France"
-        className={`flag ${selectedLanguage === 'fr' ? 'selected' : ''}`}
-        onClick={() => handleLanguageChange('fr')}
-      />
-      <img
-        src={UKFlag}
-        alt="United Kingdom"
-        className={`flag ${selectedLanguage === 'en' ? 'selected' : ''}`}
-        onClick={() => handleLanguageChange('en')}
-      />
+    <div className="language-selectors">
+      <div className="language-selector">
+        <span>Select Source Language:</span>
+        <FlagSelector
+          currentLanguage={selectedLanguage}
+          onSelect={setSelectedLanguage}
+        />
+      </div>
+      <div className="language-selector">
+        <span>Select Target Language:</span>
+        <FlagSelector
+          currentLanguage={targetLanguage}
+          onSelect={setTargetLanguage}
+        />
+      </div>
     </div>
   );
 };

@@ -57,6 +57,8 @@ export const transcribeAndTranslateAudio = async (
   targetLanguage = "en"
 ) => {
   try {
+    console.log("🚀 ~ language:", language);
+    console.log("🚀 ~ targetLanguage:", targetLanguage);
     const transcribedText = await transcribeAudio(audioFile, language);
     const translatedText = await translateText(transcribedText, targetLanguage);
     return translatedText;

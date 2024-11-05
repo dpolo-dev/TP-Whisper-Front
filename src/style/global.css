@@ -118,18 +118,26 @@ input {
   margin-top: 20px;
 }
 
+.language-selectors {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+}
+
 .language-selector {
   display: flex;
-  justify-content: center;
-  gap: 20px;
-  position: fixed;
-  top: 10px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 1000;
+  align-items: center;
+  gap: 10px;
   background-color: #1d1b31;
   padding: 10px;
   border-radius: 8px;
+}
+
+.language-selector span {
+  color: white;
+  font-weight: bold;
+  margin-right: 10px;
 }
 
 .flag {
@@ -145,31 +153,30 @@ input {
   box-shadow: 0 0 15px 5px rgba(92, 39, 251, 0.6);
 }
 
-
 .transcription-container {
-  position: absolute; /* Position relative to the parent .participant */
-  top: 0; /* Align it to the top */
-  left: 0; /* Align to the left */
-  width: 100%; /* Full width of the participant card */
-  height: 25%; /* Occupy upper 25% of the card */
-  overflow-y: auto; /* Enable scrolling for older transcriptions */
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 25%;
+  overflow-y: auto;
   display: flex;
-  flex-direction: column-reverse; /* Newest transcription at the top */
-  z-index: 2; /* Make sure it stays above other elements */
-  scrollbar-width: thin; /* Style the scrollbar for better UX */
+  flex-direction: column-reverse;
+  z-index: 2;
+  scrollbar-width: thin;
 }
 
 .transcription-text {
   color: white;
-  background-color: rgba(0, 0, 0, 0.6); /* Semi-transparent background */
+  background-color: rgba(0, 0, 0, 0.6);
   padding: 5px;
   margin: 0;
   opacity: 1;
-  transition: opacity 3s ease-in-out; /* Fade-out effect over 3 seconds */
+  transition: opacity 3s ease-in-out;
 }
 
 .transcription-text.fade-out {
-  opacity: 0; /* Fading effect for text */
+  opacity: 0;
 }
 
 .transcription-container::-webkit-scrollbar {
@@ -177,10 +184,10 @@ input {
 }
 
 .transcription-container::-webkit-scrollbar-thumb {
-  background-color: rgba(255, 255, 255, 0.3); /* Light-colored scrollbar */
+  background-color: rgba(255, 255, 255, 0.3);
   border-radius: 10px;
 }
 
 .transcription-container::-webkit-scrollbar-thumb:hover {
-  background-color: rgba(255, 255, 255, 0.6); /* Highlight on hover */
+  background-color: rgba(255, 255, 255, 0.6);
 }

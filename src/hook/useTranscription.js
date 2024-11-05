@@ -7,6 +7,7 @@ export function useTranscription(
   audioTracks,
   participant,
   selectedLanguage,
+  targetLanguage,
   selectedModel,
   handleNewTranscription
 ) {
@@ -37,7 +38,8 @@ export function useTranscription(
             try {
               const transcriptionResult = await transcribeAndTranslateAudio(
                 audioBlob,
-                selectedLanguage
+                selectedLanguage,
+                targetLanguage
               );
 
               handleNewTranscription(transcriptionResult);
@@ -70,5 +72,6 @@ export function useTranscription(
     selectedLanguage,
     selectedModel,
     handleNewTranscription,
+    targetLanguage,
   ]);
 }

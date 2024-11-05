@@ -8,7 +8,7 @@ import { useTranscription } from "../../hook/useTranscription";
 import { useSocketTranscription } from "../../hook/useSocketTranscription";
 
 const Participant = ({ isLocal, participant }) => {
-  const { selectedLanguage } = useContext(LanguageContext);
+  const { selectedLanguage, targetLanguage } = useContext(LanguageContext);
   const { selectedModel } = useContext(ModelContext);
 
   const [transcriptions, setTranscriptions] = useState([]);
@@ -36,6 +36,7 @@ const Participant = ({ isLocal, participant }) => {
     audioTracks,
     participant,
     selectedLanguage,
+    targetLanguage,
     selectedModel,
     handleNewTranscription
   );
